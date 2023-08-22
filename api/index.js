@@ -94,7 +94,6 @@ app.post('/register', async (req,res) => {
   }
 });
 
-
 app.post('/login', async(req,res)=>{
   const {username,password}=req.body;
   const found=await User.findOne({username});
@@ -128,9 +127,13 @@ app.get('/profile', (req,res) => {
   }
 });
 
+let server=null;
+if(process.env.API_PORT)
+{
+   server=app.listen(process.env.API_PORT);
+}
 
-
-const server=app.listen(4000);
+module.exports=app;
 
 const wss=new ws.WebSocketServer({server});
 wss.on('connection',(connection,req)=>{
