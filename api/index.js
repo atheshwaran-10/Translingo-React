@@ -18,6 +18,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 dotenv.config();
+app.use(express.static('public'))
 app.use(cors({credentials: true, origin: process.env.CLIENT_URL}));
 mongoose.connect(process.env.MONGO_URL);
 
