@@ -13,8 +13,10 @@ const cors=require('cors');
 const bcrypt = require('bcryptjs');
 const cookieParser=require('cookie-parser')
 const ws=require('ws');
+const fs = require('fs');
 
 app.use(express.json());
+app.use('/uploads', express.static(__dirname + '/uploads')); 
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 dotenv.config();
@@ -24,7 +26,6 @@ mongoose.connect(process.env.MONGO_URL);
 
 const jwtSecret=process.env.JWT_SECRET;
 const bcryptSalt = bcrypt.genSaltSync(10);
-
 
 async function getUserData(req){
   return new Promise ((resolve,reject)=>{
@@ -41,13 +42,17 @@ async function getUserData(req){
   })
 }
 
+
 app.post('/translate', async (req, res) => {
   const text=req.body.mess;
-  console.log(text)
+  if(text.trim()!== "")
   try {
     translate(text, null, 'en').then(data => {
-      console.log(data.translation);
-      res.json({ translatedText: data.translation });
+      if(data.translation)
+      {
+        console.log(data.translation);
+        res.json({ translatedText: data.translation });
+      }
     }).catch(err => {
       console.error(err);
     });
@@ -113,7 +118,6 @@ app.post('/login', async(req,res)=>{
 
 app.post('/logout',(req,res)=>{
   res.cookie('token','',{sameSite:'none', secure:true}).json('ok');
-  
 })
 
 app.get('/profile', (req,res) => {
@@ -128,11 +132,9 @@ app.get('/profile', (req,res) => {
   }
 });
 
-let server=null;
-if(process.env.API_PORT)
-{
-   server=app.listen(process.env.API_PORT);
-}
+
+const server=app.listen(process.env.API_PORT);
+
 
 module.exports=app;
 
@@ -183,29 +185,44 @@ wss.on('connection',(connection,req)=>{
    }
   }
 
-  connection.on('message',async (message)=>{
-    const messageData=JSON.parse( message.toString())
-    const {recipent,text}=messageData;
-    if(recipent && text)
+  connection.on('message', async (message) => {
+    const messageData = JSON.parse(message.toString());
+    const {recipent, text, file} = messageData;
+    
+    let filename = null;
+    if (file)
     {
-      const messageDoc=await MessageModel.create({
-        sender:connection.userId,
-        recipent,
-        text,
+      const parts = file.name.split('.');
+      const ext = parts[parts.length - 1];
+      filename=Date.now() +'.'+ext;
+      const path = __dirname + '/uploads/' + filename;
+      const bufferData = new Buffer(file.data.split(',')[1], 'base64');
+      fs.writeFile(path, bufferData, () => {
+        console.log('file saved:');
       });
-      [...wss.clients]
-      .filter(c=>c.userId===recipent)
-      .forEach(c=>c.send(JSON.stringify({
-        text,
+    }
+    if (recipent && (text || file))
+    {
+      console.log('file saved:'+filename);
+      console.log(text+" "+recipent)
+      const messageDoc = await MessageModel.create({
         sender:connection.userId,
         recipent,
-        _id:messageDoc._id,
-      })));
-
+        text,
+        file: file ? filename : null,
+      });
+      console.log('created message'+filename);
+      [...wss.clients]
+        .filter(c => c.userId === recipent)
+        .forEach(c => c.send(JSON.stringify({
+          text,
+          sender:connection.userId,
+          recipent,
+          file: file ? filename : null,
+          _id:messageDoc._id,
+        })));
     }
   });
 
   notifyMe();
-  
 });
-
