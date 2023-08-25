@@ -21,7 +21,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 dotenv.config();
 app.use(express.static('public'))
-app.use(cors({credentials: true, origin: process.env.CLIENT_URL}));
+app.use(cors({credentials: true, origin:true}));
 mongoose.connect(process.env.MONGO_URL);
 
 const jwtSecret=process.env.JWT_SECRET;
