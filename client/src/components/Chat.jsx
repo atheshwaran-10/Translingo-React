@@ -6,7 +6,7 @@ import {uniqBy} from 'lodash'
 import axios from "axios";
 import Contact from "./Contact";
 export default function Chat()
-{
+{ 
   const [ws,setWs]=useState(null);
   const [OnlineUsers,setOnlineUsers]=useState({});
   const [offlineUsers,setofflineUsers]=useState({});
@@ -23,17 +23,26 @@ export default function Chat()
     ConnectToWs();
   },[]);
 
-  function ConnectToWs(){
-    const ws=new WebSocket('ws://localhost:4000');
-    setWs(ws);
-    ws.addEventListener('message',handleMessage);
+  function ConnectToWs() {
+    const ws = new WebSocket('wss://translingo.onrender.com');
+  
+    ws.addEventListener('open', () => {
+      console.log('WebSocket connection is open');
+    });
+  
+    ws.addEventListener('message', (event) => {
+      handleMessage(event);
+    });
+  
     ws.addEventListener('close', () => {
-      setTimeout(()=>{
-        ConnectToWs();
-      },1000);
-    })
+      console.log('WebSocket connection is closed');
+      setTimeout(() => {
+        ConnectToWs(); 
+      }, 1000);
+    });
+  
+    setWs(ws);
   }
-
   function show(users){
     const set={};
     users.forEach(({userId,username}) => {
@@ -110,6 +119,8 @@ export default function Chat()
       axios.get('/messages/'+selectedUser).then(res => {
         setMessages(res.data);
       });
+      setNewMessage('');
+     
     }
     else{
       console.log(newMessage)

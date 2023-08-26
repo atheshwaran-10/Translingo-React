@@ -3,7 +3,7 @@ import { UserContextProvider } from "./components/UserContext";
 import Routes from "./components/Routes";
 
 function App() {
-  axios.defaults.baseURL = 'https://master--transcendent-cupcake-4a1867.netlify.app';
+  axios.defaults.baseURL = 'https://translingo.onrender.com';
   axios.defaults.withCredentials = true;
   return (
     //if login not
