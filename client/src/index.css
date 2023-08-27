@@ -2,3 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
+@media screen and (min-width: 769px) {
+  .mobile{
+    padding-bottom: 0rem;
+  }
+}

@@ -188,7 +188,7 @@ export default function Chat()
   const messagesWithSet=uniqBy(messages,'_id');
 
   return (
-    <div className="flex h-screen pb-15">
+    <div className="flex h-screen pb-15 mobile">
       <div className="bg-white-100 w-1/3 flex flex-col">
       <div className="flex-grow">
       <Logo/>
