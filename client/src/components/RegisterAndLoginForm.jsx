@@ -40,12 +40,7 @@ export default function RegisterAndLoginForm() {
                type="password"
                placeholder="password"
                className="block w-full rounded-sm p-2 mb-2 border" />
-         <input value={mail}
-               onChange={ev => setPassword(ev.target.value)}
-               type="email"
-               id="em"
-               placeholder="E-Mail"
-               className={"block w-full rounded-sm p-2 mb-2 border "+displaym} />
+
         <button className="bg-blue-500 text-white block w-full rounded-sm p-2">
           {isLoginOrRegister === 'register' ? 'Register' : 'Login'}
         </button>
